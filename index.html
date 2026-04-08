@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Round Robin — Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Libre+Franklin:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #0AB5C4;
+  --teal-10: #E7F8F9;
+  --teal-20: #CEF0F3;
+  --teal-40: #9DE1E7;
+  --teal-60: #6CD2DC;
+  --navy: #13153C;
+  --navy-10: #E7E8EC;
+  --navy-20: #D0D0D8;
+  --navy-40: #A1A1B1;
+  --navy-60: #71738A;
+  --denim: #324584;
+  --denim-10: #ebecf3;
+  --denim-20: #d6dae6;
+  --bg: #F4F5F5;
+  --panel: #FAFAFA;
+  --card: #FFFFFF;
+  --border: #CDCFD6;
+  --sidebar-accent: #ECEEF6;
+  --secondary: #F3F4FA;
+  --muted: #636980;
+  --rose: #F25285;
+  --amber: #F6A533;
+}
+
+body {
+  font-family: 'Libre Franklin', sans-serif;
+  background: var(--bg);
+  color: var(--navy);
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* NAV */
+nav {
+  background: var(--navy);
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-mark {
+  width: 28px;
+  height: 28px;
+}
+
+.nav-logo-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.nav-title {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  color: var(--navy-40);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-tab {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  color: var(--navy-40);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: all 0.15s;
+  background: none;
+}
+
+.nav-tab:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-tab.active { background: var(--teal); color: var(--navy); font-weight: 600; border-color: var(--teal); }
+
+/* LAYOUT */
+.wrapper { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 2rem; }
+.page-header h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+.page-header p { font-size: 14px; color: var(--muted); }
+
+/* METRICS */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+@media(max-width:640px){ .metrics { grid-template-columns: 1fr 1fr; } }
+
+.metric {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+.metric::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, var(--teal), var(--navy));
+}
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.metric-value {
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+
+/* POOLS */
+.pools { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 2rem; }
+@media(max-width:640px){ .pools { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.section-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+
+.pool-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.pool-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.pool-dot-named { background: var(--teal); }
+.pool-dot-territory { background: var(--denim); }
+.pool-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+.pool-sub { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+.ae-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--bg);
+}
+.ae-row:last-child { border-bottom: none; }
+
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px; font-weight: 600;
+  flex-shrink: 0;
+}
+.av-named { background: var(--teal-10); color: var(--teal); border: 1px solid var(--teal-40); }
+.av-territory { background: var(--denim-10); color: var(--denim); border: 1px solid var(--denim-20); }
+
+.ae-name { font-size: 14px; font-weight: 500; color: var(--navy); flex: 1; font-family: 'Libre Franklin', sans-serif; }
+.ae-count { font-size: 13px; color: var(--muted); font-family: 'Poppins', sans-serif; font-weight: 500; margin-right: 6px; }
+
+.badge {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.badge-named { background: var(--teal-10); color: #0891a0; border: 1px solid var(--teal-40); }
+.badge-territory { background: var(--denim-10); color: var(--denim); border: 1px solid var(--denim-20); }
+.badge-ooo { background: #FEF3C7; color: #92400E; border: 1px solid #F6A53340; }
+
+.toggle-ooo {
+  font-size: 11px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+  text-decoration: underline; padding: 2px 4px;
+  font-family: 'Libre Franklin', sans-serif;
+}
+.toggle-ooo:hover { color: var(--navy); }
+
+/* FORM */
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+@media(max-width:640px){ .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--navy); letter-spacing: 0.02em;
+}
+
+input, select, textarea {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 14px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--navy);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--teal);
+  background: #fff;
+}
+textarea { resize: vertical; min-height: 60px; }
+
+.emp-hint { font-size: 11px; margin-top: 3px; color: var(--muted); font-family: 'Libre Franklin', sans-serif; }
+
+.chips-label {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--navy); letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.suggest-note {
+  font-size: 11px; color: var(--teal);
+  font-family: 'Libre Franklin', sans-serif; font-weight: 400;
+}
+
+.ae-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  background: var(--panel);
+  color: var(--muted);
+  transition: all 0.12s;
+}
+.chip:hover { border-color: var(--navy-40); color: var(--navy); }
+.chip.selected { background: var(--navy); color: #fff; border-color: var(--navy); }
+.chip.suggested { border: 2px solid var(--teal); color: var(--teal); background: var(--teal-10); font-weight: 600; }
+.chip.ooo-chip { opacity: 0.35; pointer-events: none; }
+
+.submit-btn {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px; font-weight: 600;
+  padding: 11px 28px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, var(--teal), #0891a0);
+  color: var(--navy);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.submit-btn:active { transform: translateY(0); }
+
+/* TOAST */
+.toast {
+  background: var(--teal-10);
+  border: 1px solid var(--teal-40);
+  color: #0891a0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+  font-family: 'Libre Franklin', sans-serif;
+}
+
+/* TABLE */
+.log-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 580px; }
+th {
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px; font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--bg);
+  vertical-align: top;
+  font-family: 'Libre Franklin', sans-serif;
+  color: var(--navy);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--panel); }
+
+.empty { font-size: 13px; color: var(--muted); padding: 2.5rem 0; text-align: center; font-family: 'Libre Franklin', sans-serif; }
+
+/* ADMIN COUNTS */
+.count-ctrl { display: flex; align-items: center; gap: 10px; }
+.count-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--navy);
+  transition: background 0.1s;
+}
+.count-btn:hover { background: var(--secondary); }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+
+/* SECTION MARGIN */
+.section { margin-bottom: 2rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <svg class="logo-mark" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 4C8.477 4 4 8.477 4 14s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" fill="none"/>
+      <path d="M7 14c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#0AB5C4" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M10 17.5c0-2.21 1.79-4 4-4s4 1.79 4 4" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="14" cy="20" r="1.5" fill="#0AB5C4"/>
+    </svg>
+    <span class="nav-logo-text">Hero</span>
+  </div>
+  <span class="nav-title">Round Robin</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="setMode('bdr')">Log meeting</button>
+    <button class="nav-tab" onclick="setMode('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="setMode('admin')">Admin</button>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+  <!-- BDR VIEW -->
+  <div id="view-bdr">
+    <div class="page-header">
+      <h1>Log a meeting</h1>
+      <p>Check who's up next, then log your assignment below.</p>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div class="pools">
+      <div class="card">
+        <div class="pool-header">
+          <div class="pool-dot pool-dot-named"></div>
+          <div class="pool-title">Named AEs</div>
+          <div class="pool-sub">1,000+ employees</div>
+        </div>
+        <div id="bdr-named"></div>
+      </div>
+      <div class="card">
+        <div class="pool-header">
+          <div class="pool-dot pool-dot-territory"></div>
+          <div class="pool-title">Territory AEs</div>
+          <div class="pool-sub">Under 1,000 employees</div>
+        </div>
+        <div id="bdr-territory"></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="section-label" style="margin-bottom:18px;">New assignment</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Your name</label>
+          <select id="f-bdr">
+            <option value="">Select your name...</option>
+            <option>Bella</option><option>Ellie</option><option>Josh</option><option>Seth</option><option>Tori</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Account name</label>
+          <input type="text" id="f-account" placeholder="Acme Corp" />
+        </div>
+        <div class="form-group">
+          <label>Employee count</label>
+          <input type="number" id="f-emp" placeholder="e.g. 1,200" min="1" oninput="onEmpInput()" />
+          <div class="emp-hint" id="emp-hint">Check LinkedIn or Salesforce</div>
+        </div>
+        <div class="form-group">
+          <label>Meeting type</label>
+          <select id="f-type">
+            <option value="">Select...</option>
+            <option>Discovery</option><option>Demo</option><option>Intro call</option><option>Follow-up</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="f-date" />
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div class="chips-label">
+          Assign to AE
+          <span class="suggest-note" id="suggest-note"></span>
+        </div>
+        <div class="ae-chips" id="ae-chips"></div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>Notes <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+        <textarea id="f-notes" placeholder="Any context for the AE..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitAssignment()">Log assignment →</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="view-dashboard" style="display:none;">
+    <div class="page-header">
+      <h1>Round robin dashboard</h1>
+      <p>Live assignment counts and full meeting log.</p>
+    </div>
+    <div class="metrics" id="dash-metrics"></div>
+    <div class="pools section">
+      <div class="card">
+        <div class="pool-header">
+          <div class="pool-dot pool-dot-named"></div>
+          <div class="pool-title">Named AEs</div>
+          <div class="pool-sub">1,000+ employees</div>
+        </div>
+        <div id="dash-named"></div>
+      </div>
+      <div class="card">
+        <div class="pool-header">
+          <div class="pool-dot pool-dot-territory"></div>
+          <div class="pool-title">Territory AEs</div>
+          <div class="pool-sub">Under 1,000 employees</div>
+        </div>
+        <div id="dash-territory"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px;">Assignment log</div>
+      <div class="log-wrap" id="dash-log"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="view-admin" style="display:none;">
+    <div class="page-header">
+      <h1>Admin</h1>
+      <p>Manage AE availability and adjust assignment counts.</p>
+    </div>
+    <div class="card section">
+      <div class="section-label" style="margin-bottom:14px;">AE availability</div>
+      <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:10px;letter-spacing:0.02em;">Named AEs</div>
+      <div id="admin-named-pool"></div>
+      <div class="divider"></div>
+      <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:10px;letter-spacing:0.02em;">Territory AEs</div>
+      <div id="admin-territory-pool"></div>
+    </div>
+    <div class="card section">
+      <div class="section-label" style="margin-bottom:14px;">Adjust counts</div>
+      <div id="admin-counts"></div>
+    </div>
+    <div class="card">
+      <div class="section-label" style="margin-bottom:14px;">Full log</div>
+      <div class="log-wrap" id="admin-log"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const S = {
+  aes: [
+    { id:'mike',  name:'Mike',  initials:'MK', pool:'named',     count:0, ooo:false },
+    { id:'drew',  name:'Drew',  initials:'DR', pool:'named',     count:0, ooo:false },
+    { id:'kevin', name:'Kevin', initials:'KV', pool:'named',     count:0, ooo:false },
+    { id:'brian', name:'Brian', initials:'BR', pool:'territory', count:0, ooo:false },
+    { id:'eric',  name:'Eric',  initials:'ER', pool:'territory', count:0, ooo:false },
+    { id:'vibes', name:'Vibes', initials:'VB', pool:'territory', count:0, ooo:false },
+  ],
+  log: [],
+  selectedAE: null,
+  mode: 'bdr',
+};
+
+function save() {
+  try { localStorage.setItem('hero-rr-v1', JSON.stringify({ aes: S.aes, log: S.log })); } catch(e) {}
+}
+
+function loadData() {
+  try {
+    const d = JSON.parse(localStorage.getItem('hero-rr-v1'));
+    if (d && d.aes) S.aes = d.aes;
+    if (d && d.log) S.log = d.log;
+  } catch(e) {}
+}
+
+function getNextUp(pool) {
+  const el = S.aes.filter(a => a.pool === pool && !a.ooo);
+  if (!el.length) return null;
+  return el.reduce((a,b) => a.count <= b.count ? a : b);
+}
+
+function poolRows(pool, showToggle) {
+  const next = getNextUp(pool);
+  return S.aes.filter(a => a.pool === pool).map(ae => `
+    <div class="ae-row">
+      <div class="avatar av-${pool}">${ae.initials}</div>
+      <div class="ae-name">${ae.name}</div>
+      <span class="ae-count">${ae.count}</span>
+      ${ae.ooo
+        ? `<span class="badge badge-ooo">OOO</span>`
+        : (next && next.id===ae.id ? `<span class="badge badge-${pool}">Up next</span>` : '')}
+      ${showToggle ? `<button class="toggle-ooo" onclick="toggleOOO('${ae.id}')">${ae.ooo?'Mark back':'Mark OOO'}</button>` : ''}
+    </div>`).join('');
+}
+
+function renderChips(suggestedPool) {
+  document.getElementById('ae-chips').innerHTML = S.aes.map(ae => {
+    const next = getNextUp(ae.pool);
+    const isSug = suggestedPool===ae.pool && next && next.id===ae.id;
+    const isSel = S.selectedAE===ae.id;
+    return `<div class="chip ${isSel?'selected':isSug?'suggested':''} ${ae.ooo?'ooo-chip':''}" onclick="selectAE('${ae.id}')">${ae.name}${ae.ooo?' (OOO)':''}</div>`;
+  }).join('');
+  const note = document.getElementById('suggest-note');
+  if (suggestedPool) {
+    const next = getNextUp(suggestedPool);
+    note.textContent = next
+      ? `${suggestedPool==='named'?'1,000+ employees → Named AE pool':'Under 1,000 → Territory AE pool'} · ${next.name} is up next`
+      : '';
+  } else note.textContent = '';
+}
+
+function selectAE(id) {
+  S.selectedAE = id;
+  const emp = parseInt(document.getElementById('f-emp').value);
+  renderChips(!isNaN(emp) ? (emp>=1000?'named':'territory') : null);
+}
+
+function onEmpInput() {
+  const val = parseInt(document.getElementById('f-emp').value);
+  const hint = document.getElementById('emp-hint');
+  if (!isNaN(val)) {
+    const pool = val>=1000?'named':'territory';
+    hint.textContent = val>=1000?'1,000+ employees → Named AE pool':'Under 1,000 → Territory AE pool';
+    hint.style.color = val>=1000?'#0891a0':'var(--denim)';
+    const next = getNextUp(pool);
+    if (next && !S.selectedAE) S.selectedAE = next.id;
+    renderChips(pool);
+  } else {
+    hint.textContent = 'Check LinkedIn or Salesforce';
+    hint.style.color = 'var(--muted)';
+    renderChips(null);
+  }
+}
+
+function submitAssignment() {
+  const bdr = document.getElementById('f-bdr').value;
+  const account = document.getElementById('f-account').value.trim();
+  const emp = document.getElementById('f-emp').value;
+  const type = document.getElementById('f-type').value;
+  const date = document.getElementById('f-date').value;
+  const notes = document.getElementById('f-notes').value.trim();
+  if (!bdr||!account||!emp||!S.selectedAE||!date) {
+    alert('Please fill in your name, account name, employee count, date, and select an AE.');
+    return;
+  }
+  const ae = S.aes.find(a=>a.id===S.selectedAE);
+  ae.count++;
+  S.log.unshift({ account, emp:parseInt(emp), bdr, type, date, notes, ae:ae.name, pool:ae.pool, ts:Date.now() });
+  S.selectedAE = null;
+  ['f-account','f-emp','f-notes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-bdr').value='';
+  document.getElementById('f-type').value='';
+  document.getElementById('f-date').valueAsDate = new Date();
+  document.getElementById('emp-hint').textContent='Check LinkedIn or Salesforce';
+  document.getElementById('emp-hint').style.color='var(--muted)';
+  save(); renderAll();
+  const t = document.getElementById('toast');
+  t.textContent = `✓  Assigned — ${account} → ${ae.name}`;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none', 4000);
+}
+
+function toggleOOO(id) {
+  S.aes.find(a=>a.id===id).ooo ^= true;
+  save(); renderAll();
+}
+
+function logTable(entries) {
+  if (!entries.length) return '<div class="empty">No assignments logged yet.</div>';
+  return `<table>
+    <thead><tr>
+      <th>Date</th><th>Account</th><th>Employees</th><th>AE</th><th>Pool</th><th>Type</th><th>BDR</th><th>Notes</th>
+    </tr></thead>
+    <tbody>${entries.map(l=>`<tr>
+      <td style="white-space:nowrap;color:var(--muted)">${l.date}</td>
+      <td style="font-weight:500">${l.account}</td>
+      <td style="font-family:'Poppins',sans-serif;font-weight:500">${l.emp.toLocaleString()}</td>
+      <td style="font-weight:600">${l.ae}</td>
+      <td><span class="badge badge-${l.pool}">${l.pool==='named'?'Named':'Territory'}</span></td>
+      <td style="color:var(--muted)">${l.type||'—'}</td>
+      <td style="color:var(--muted)">${l.bdr||'—'}</td>
+      <td style="color:var(--muted);max-width:160px;font-size:12px">${l.notes||'—'}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderMetrics(id) {
+  const week = S.log.filter(l=>(Date.now()-l.ts)<7*86400000).length;
+  const namedCount = S.aes.filter(a=>a.pool==='named').reduce((s,a)=>s+a.count,0);
+  const terrCount = S.aes.filter(a=>a.pool==='territory').reduce((s,a)=>s+a.count,0);
+  document.getElementById(id).innerHTML = `
+    <div class="metric"><div class="metric-label">Total assigned</div><div class="metric-value">${S.log.length}</div></div>
+    <div class="metric"><div class="metric-label">Named AE meetings</div><div class="metric-value">${namedCount}</div></div>
+    <div class="metric"><div class="metric-label">Territory meetings</div><div class="metric-value">${terrCount}</div></div>
+    <div class="metric"><div class="metric-label">Last 7 days</div><div class="metric-value">${week}</div></div>`;
+}
+
+function renderAll() {
+  document.getElementById('bdr-named').innerHTML = poolRows('named', false);
+  document.getElementById('bdr-territory').innerHTML = poolRows('territory', false);
+  renderChips(null);
+  if (S.mode==='dashboard') {
+    renderMetrics('dash-metrics');
+    document.getElementById('dash-named').innerHTML = poolRows('named', false);
+    document.getElementById('dash-territory').innerHTML = poolRows('territory', false);
+    document.getElementById('dash-log').innerHTML = logTable(S.log);
+  }
+  if (S.mode==='admin') {
+    document.getElementById('admin-named-pool').innerHTML = poolRows('named', true);
+    document.getElementById('admin-territory-pool').innerHTML = poolRows('territory', true);
+    document.getElementById('admin-counts').innerHTML = S.aes.map(ae=>`
+      <div class="ae-row">
+        <div class="avatar av-${ae.pool}">${ae.initials}</div>
+        <div class="ae-name">${ae.name}</div>
+        <div class="count-ctrl">
+          <button class="count-btn" onclick="adj('${ae.id}',-1)">−</button>
+          <span style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;min-width:28px;text-align:center;">${ae.count}</span>
+          <button class="count-btn" onclick="adj('${ae.id}',1)">+</button>
+        </div>
+      </div>`).join('');
+    document.getElementById('admin-log').innerHTML = logTable(S.log);
+  }
+}
+
+function adj(id, delta) {
+  const ae = S.aes.find(a=>a.id===id);
+  ae.count = Math.max(0, ae.count+delta);
+  save(); renderAll();
+}
+
+function setMode(mode) {
+  S.mode = mode;
+  ['bdr','dashboard','admin'].forEach(m =>
+    document.getElementById('view-'+m).style.display = m===mode ? 'block' : 'none'
+  );
+  document.querySelectorAll('.nav-tab').forEach((t,i) =>
+    t.classList.toggle('active', ['bdr','dashboard','admin'][i]===mode)
+  );
+  renderAll();
+}
+
+document.getElementById('f-date').valueAsDate = new Date();
+loadData();
+renderAll();
+</script>
+</body>
+</html>
